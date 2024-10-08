@@ -1,0 +1,19 @@
+currency:
+  cbr-url: https://cbr.ru/scripts/XML_daily.asp
+spring:
+  cache:
+    type: caffeine
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        registerHealthIndicator: true
+        failure-rate-threshold: 50
+        sliding-window-size: 10
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3

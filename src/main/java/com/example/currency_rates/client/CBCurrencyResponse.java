@@ -15,7 +15,7 @@ public class CBCurrencyResponse {
     private String id;
 
     @JacksonXmlProperty(localName = "NumCode")
-    private int numCode;
+    private String numCode;
 
     @JacksonXmlProperty(localName = "CharCode")
     private String charCode;

@@ -9,8 +9,8 @@ import com.example.currency_rates.exception.CurrencyNotFoundException;
 import com.example.currency_rates.exception.InvalidRequestException;
 import com.example.currency_rates.exception.ServiceException;
 import com.example.currency_rates.mapper.CBCurrencyResponseToCurrencyRateResponseMapper;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Currency;
@@ -30,16 +30,12 @@ public class CurrencyService {
         this.currencyMapper = currencyMapper;
     }
 
-    @Cacheable(value = "currencyRates", key = "#code", unless = "#result == null")
     public CurrencyRateResponse getCurrencyRate(String code) {
         validateCurrencyCode(code);
 
         try {
             List<CBCurrencyResponse> currencies = currencyClient.getCurrencies();
-            CBCurrencyResponse currency = currencies.stream()
-                    .filter(c -> Objects.equals(c.getCharCode(), code))
-                    .findFirst()
-                    .orElseThrow(() -> new CurrencyNotFoundException("Currency not found - " + code));
+            CBCurrencyResponse currency = getCurrencyByCode(code, currencies);
 
             return new CurrencyRateResponse(
                     currency.getCharCode(),
@@ -83,9 +79,6 @@ public class CurrencyService {
         return createConvertCurrencyResponse(request, convertedAmount);
     }
 
-
-
-
     private void validateConvertRequest(ConvertCurrencyRequest request) {
         if (request.getFromCurrency() == null || request.getToCurrency() == null || request.getAmount() == null) {
             throw new InvalidRequestException("Missing required parameters");
@@ -96,8 +89,6 @@ public class CurrencyService {
         validateCurrencyCode(request.getFromCurrency());
         validateCurrencyCode(request.getToCurrency());
     }
-
-
 
     private void validateCurrencyCode(String code) {
         if (RUB_CODE.equals(code)) {
@@ -114,7 +105,6 @@ public class CurrencyService {
             throw new InvalidRequestException("Unsupported currency code - " + code);
         }
     }
-
 
     private CBCurrencyResponse getCurrencyByCode(String code, List<CBCurrencyResponse> currencies) {
         return currencies.stream()

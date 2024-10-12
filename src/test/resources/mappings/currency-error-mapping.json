@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/scripts/XML_daily.asp"
+  },
+  "response": {
+    "status": 503,
+    "body": "Service Unavailable",
+    "headers": {
+      "Content-Type": "text/plain"
+    }
+  }
+}

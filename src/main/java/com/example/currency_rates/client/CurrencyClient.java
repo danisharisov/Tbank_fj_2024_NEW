@@ -11,24 +11,22 @@ import java.util.List;
 
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-
 @Component
 public class CurrencyClient {
     private final RestTemplate restTemplate;
     private final String cbrFullUrl;
     private final XmlMapper xmlMapper;
 
-    public CurrencyClient(RestTemplate restTemplate, @Value("${currency.cbr-url}") String cbrFullUrl) {
+    public CurrencyClient(RestTemplate restTemplate, @Value("${currency.cbr-url}") String cbrFullUrl, XmlMapper xmlMapper) {
         this.restTemplate = restTemplate;
         this.cbrFullUrl = cbrFullUrl;
-        this.xmlMapper = new XmlMapper();
+        this.xmlMapper = xmlMapper;
     }
 
     @CircuitBreaker(name = "cbrService", fallbackMethod = "fallbackGetCurrencies")
     @Cacheable(value = "currencyList", unless = "#result == null")
     public List<CBCurrencyResponse> getCurrencies() {
         String xmlResponse = restTemplate.getForObject(cbrFullUrl, String.class);
-        System.out.println("Response: " + xmlResponse);
         return parseCurrencies(xmlResponse);
     }
 

@@ -122,4 +122,6 @@ public class CurrencyService {
                 convertedAmount.setScale(2, RoundingMode.HALF_UP).toPlainString()
         );
     }
+
+
 }

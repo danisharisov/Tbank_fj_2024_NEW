@@ -53,6 +53,7 @@ dependencies {
     testImplementation 'org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-13'
     testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.0'
     testImplementation 'org.xmlunit:xmlunit-core:2.9.0'
+
 }
 
 tasks.named('test') {

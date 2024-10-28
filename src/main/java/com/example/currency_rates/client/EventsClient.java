@@ -13,14 +13,13 @@ import java.util.concurrent.Semaphore;
 public class EventsClient {
 
     private final RestTemplate restTemplate;
-    private final Semaphore semaphore;
-
-    @Value("${kudago.e-url}")
+    protected final Semaphore semaphore;
     private String eventApiUrl;
 
     public EventsClient(RestTemplate restTemplate, KudaGoConfig properties) {
         this.restTemplate = restTemplate;
         this.semaphore = new Semaphore(properties.getMaxConcurrentRequests());
+        this.eventApiUrl = properties.getEUrl();
     }
 
     public EventResponse getEvents(long dateFrom, long dateTo) {

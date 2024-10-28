@@ -3,6 +3,7 @@ package com.example.currency_rates.services;
 import com.example.currency_rates.client.EventsClient;
 import com.example.currency_rates.dto.Event;
 import com.example.currency_rates.dto.EventResponse;
+import com.example.currency_rates.exception.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public class ReactiveEventService {
     private final EventsClient eventApi;
     private final CurrencyService currencyService;
-    private static final Logger logger = LoggerFactory.getLogger(EventService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReactiveEventService.class);
     private static final Pattern PRICE_PATTERN = Pattern.compile("[\\d.,]+");
 
     public ReactiveEventService(EventsClient eventApi, CurrencyService currencyService) {
@@ -37,7 +38,12 @@ public class ReactiveEventService {
             logger.info("No date range provided. Defaulting to last 7 days: from {} to {}", dateFrom, dateTo);
         }
 
-        Mono<List<Event>> eventsMono = getEvents(dateFrom, dateTo);
+        Mono<List<Event>> eventsMono = getEvents(dateFrom, dateTo)
+                .onErrorMap(ex -> {
+                    logger.error("Error fetching events: {}", ex.getMessage());
+                    return new ServiceException("Failed to fetch events", ex);
+                });
+
         Mono<Double> convertedBudgetMono = Mono.fromCallable(() -> {
             double rate = currencyService.getCurrencyRate(currency).getRate().doubleValue();
             logger.info("Currency rate for {}: {}", currency, rate);
@@ -57,6 +63,10 @@ public class ReactiveEventService {
                     eventResponse.setCount(filteredEvents.size());
                     eventResponse.setResults(filteredEvents);
                     return Mono.just(eventResponse);
+                })
+                .onErrorResume(ex -> {
+                    logger.error("Error occurred while filtering events: {}", ex.getMessage());
+                    return Mono.error(new ServiceException("Failed to filter events", ex));
                 });
     }
 
@@ -69,6 +79,11 @@ public class ReactiveEventService {
             EventResponse response = eventApi.getEvents(dateFromEpoch, dateToEpoch);
             logger.info("Received response: {}", response);
 
+            if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
+                logger.error("Received null or empty response from API");
+                throw new ServiceException("No events found for the specified date range.");
+            }
+
             return response.getResults().stream().map(result -> {
                 boolean isFree = result.isFree();
                 String price = result.getPrice();
@@ -79,6 +94,9 @@ public class ReactiveEventService {
 
                 return new Event(result.getId(), result.getTitle(), isFree, price, parsedPrice);
             }).collect(Collectors.toList());
+        }).onErrorMap(ex -> {
+            logger.error("Error fetching events from API: {}", ex.getMessage());
+            return new ServiceException("Failed to fetch events from API", ex);
         });
     }
 

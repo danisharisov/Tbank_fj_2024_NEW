@@ -29,11 +29,17 @@ public class EventControllerV2 {
 
         logger.info("Received request to get events with budget: {}, currency: {}, dateFrom: {}, dateTo: {}", budget, currency, dateFrom, dateTo);
 
-        return eventService.getFilteredEvents(Double.parseDouble(budget), currency, dateFrom, dateTo)
-                .flatMap(eventResponse -> {
-                    List<EventResponse> eventList = Collections.singletonList(eventResponse);
-                    return Mono.just(ResponseEntity.ok(eventList));
-                })
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        try {
+            double parsedBudget = Double.parseDouble(budget); // Попробуем преобразовать бюджет
+            return eventService.getFilteredEvents(parsedBudget, currency, dateFrom, dateTo)
+                    .flatMap(eventResponse -> {
+                        List<EventResponse> eventList = Collections.singletonList(eventResponse);
+                        return Mono.just(ResponseEntity.ok(eventList));
+                    })
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        } catch (NumberFormatException e) {
+            logger.error("Invalid budget format: {}", budget);
+            return Mono.just(ResponseEntity.badRequest().build()); // Возвращаем 400 Bad Request
+        }
     }
 }

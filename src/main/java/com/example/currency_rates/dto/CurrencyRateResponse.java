@@ -12,4 +12,5 @@ import java.math.BigDecimal;
 public class CurrencyRateResponse {
     private String currency;
     private BigDecimal rate;
+
 }

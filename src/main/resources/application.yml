@@ -1,3 +1,6 @@
+kudago:
+  e-url: https://kudago.com/public-api/v1.4/events/
+  maxConcurrentRequests: 8
 currency:
   cbr-url: https://cbr.ru/scripts/XML_daily.asp
 spring:

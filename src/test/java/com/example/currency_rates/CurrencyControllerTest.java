@@ -41,9 +41,9 @@ class CurrencyControllerTest {
         MockitoAnnotations.openMocks(this);
 
         mockCurrencies = new ArrayList<>();
-        mockCurrencies.add(new CBCurrencyResponse("R01235", 840, "USD", 1, "Доллар США", "70.50"));
-        mockCurrencies.add(new CBCurrencyResponse("R01239", 978, "EUR", 1, "Евро", "82.30"));
-        mockCurrencies.add(new CBCurrencyResponse("R00000", 643, "RUB", 1, "Российский рубль", "1"));
+        mockCurrencies.add(new CBCurrencyResponse("R01235", "840", "USD", 1, "Доллар США", "70.50"));
+        mockCurrencies.add(new CBCurrencyResponse("R01239", "978", "EUR", 1, "Евро", "82.30"));
+        mockCurrencies.add(new CBCurrencyResponse("R00000", "643", "RUB", 1, "Российский рубль", "1"));
     }
 
     @Test
